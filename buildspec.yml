@@ -23,7 +23,7 @@ phases:
           .
   post_build:
     commands:
-      - echo "Package published to CodeArtifact stable-bloom"
+      - echo "Package published to CodeArtifact pip-repo"
 
 cache:
   paths:
