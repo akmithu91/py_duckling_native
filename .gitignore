@@ -1,3 +1,5 @@
 .idea
 python/py_duckling_native/*.so
 target
+python/py_duckling_native/libs/*.so
+python/py_duckling_native/libs/*.so.*

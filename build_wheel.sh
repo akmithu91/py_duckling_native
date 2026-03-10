@@ -12,7 +12,7 @@ echo "=== Step 2: Locate Duckling .so files ==="
 
 # uv build uses an isolated env, so the marker file won't be here.
 # Find ext_lib from the cargo registry cache directly.
-DUCKLING_LIB_DIR=$(find "$HOME/.cargo/registry/src" -type d -path "*/rust_duckling_host-*/ext_lib" 2>/dev/null | sort -V | tail -1)
+DUCKLING_LIB_DIR=$(find "$HOME/.cargo/registry/src/cicd-572493397591.d.codeartifact.us-west-2.amazonaws.com-1708697c256814cc" -type d -path "duckling_rust-*/ext_lib" 2>/dev/null | sort -V | tail -1)
 
 if [[ -z "$DUCKLING_LIB_DIR" || ! -d "$DUCKLING_LIB_DIR" ]]; then
     echo "ERROR: Could not find rust_duckling_host ext_lib in ~/.cargo/registry/src"

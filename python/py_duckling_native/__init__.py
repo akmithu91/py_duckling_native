@@ -31,32 +31,40 @@ def _preload_libs():
     transitive .so dependencies must be loaded with RTLD_GLOBAL
     before the Python extension module is loaded.
     """
-    libs_dir = Path(__file__).parent / "libs"
-    if not libs_dir.exists():
-        return
+    # 1. Local libs directory (from build.rs or manual copy)
+    package_dir = Path(__file__).parent
+    local_libs_dir = package_dir / "libs"
+    
+    # 2. Maturin-managed libs directory (for wheels)
+    # Maturin usually names it <package_name>.libs at the same level as the package
+    maturin_libs_dir = package_dir.parent / f"{package_dir.name}.libs"
 
-    # Load libffi and libgmp first (low-level deps), then Haskell RTS,
-    # then everything else. Order matters for symbol resolution.
-    so_files = sorted(libs_dir.glob("*.so*"))
-
-    # Prioritize loading order: system deps → RTS → everything else
     priority_prefixes = ["libffi", "libgmp", "libpcre", "libHSrts"]
-    early = []
-    late = []
-    for f in so_files:
-        name = f.name
-        if any(name.startswith(p) for p in priority_prefixes):
-            early.append(f)
-        else:
-            late.append(f)
+    
+    for libs_dir in [local_libs_dir, maturin_libs_dir]:
+        if not libs_dir.exists():
+            continue
 
-    for lib_path in early + late:
-        try:
-            ctypes.CDLL(str(lib_path), mode=ctypes.RTLD_GLOBAL)
-        except OSError:
-            # Some versioned symlinks may fail; that's OK as long as
-            # the real file loaded successfully.
-            pass
+        # Load libffi and libgmp first (low-level deps), then Haskell RTS,
+        # then everything else. Order matters for symbol resolution.
+        so_files = sorted(libs_dir.glob("*.so*"))
+
+        early = []
+        late = []
+        for f in so_files:
+            name = f.name
+            if any(name.startswith(p) for p in priority_prefixes):
+                early.append(f)
+            else:
+                late.append(f)
+
+        for lib_path in early + late:
+            try:
+                ctypes.CDLL(str(lib_path), mode=ctypes.RTLD_GLOBAL)
+            except OSError:
+                # Some versioned symlinks or renamed files may fail; that's OK 
+                # as long as the real file loaded successfully.
+                pass
 
 
 # Preload before importing the native extension
