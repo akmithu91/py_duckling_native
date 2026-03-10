@@ -15,7 +15,11 @@ COPY . .
 RUN --mount=type=secret,id=token \
     mkdir -p .cargo && \
     printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > .cargo/config.toml && \
-    printf '[registries.codeartifact]\ntoken = "Basic %s"\n' "$(echo -n "aws:$(cat /run/secrets/token)" | base64 -w 0)" > /root/.cargo/credentials.toml && \
+    echo "--- DEBUG: testing token against CodeArtifact Cargo endpoint ---" && \
+    echo "Token length: $(cat /run/secrets/token | wc -c)" && \
+    curl -s -o /dev/null -w "HTTP status: %{http_code}\n" -H "Authorization: Bearer $(cat /run/secrets/token)" "${CODEARTIFACT_CARGO_URL}config.json" && \
+    echo "--- DEBUG: end ---" && \
+    cargo login --registry codeartifact "Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
     export UV_INDEX_USERNAME=aws && \
