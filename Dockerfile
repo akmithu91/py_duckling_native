@@ -7,11 +7,15 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 ARG CODEARTIFACT_URL
+ARG CODEARTIFACT_CARGO_URL
 
 WORKDIR /app
 COPY . .
 
 RUN --mount=type=secret,id=token \
+    mkdir -p .cargo && \
+    printf '[registries.codeartifact]\nindex = "sparse+%s"\n' "${CODEARTIFACT_CARGO_URL}" > .cargo/config.toml && \
+    export CARGO_REGISTRIES_CODEARTIFACT_TOKEN="Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
     export UV_INDEX_USERNAME=aws && \
