@@ -14,7 +14,7 @@ COPY . .
 
 RUN --mount=type=secret,id=token \
     mkdir -p .cargo && \
-    printf '[registries.codeartifact]\nindex = "sparse+%s"\n' "${CODEARTIFACT_CARGO_URL}" > .cargo/config.toml && \
+    printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > .cargo/config.toml && \
     export CARGO_REGISTRIES_CODEARTIFACT_TOKEN="Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
