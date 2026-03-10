@@ -1,0 +1,13 @@
+[build-system]
+requires = ["maturin>=1.0,<2.0"]
+build-backend = "maturin"
+
+[project]
+name = "py-duckling-native"
+version = "0.1.1"
+description = "Python bindings for Facebook's Duckling NLP library via Rust FFI"
+requires-python = ">=3.8"
+
+[tool.maturin]
+python-source = "python"
+module-name = "py_duckling_native._native"

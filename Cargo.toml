@@ -1,0 +1,12 @@
+[package]
+name = "py_duckling_native"
+version = "0.1.1"
+edition = "2021"
+
+[lib]
+name = "py_duckling_native"
+crate-type = ["cdylib"]
+
+[dependencies]
+pyo3 = { version = "0.28.2", features = ["extension-module"] }
+duckling_rust = { version = "0.1.4", registry = "my_codeartifact" }
