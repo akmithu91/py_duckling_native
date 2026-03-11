@@ -15,13 +15,12 @@ COPY . .
 RUN printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml
 
 RUN --mount=type=secret,id=token \
-    export CARGO_REGISTRIES_CODEARTIFACT_TOKEN="Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
     export UV_INDEX_USERNAME=aws && \
     export UV_INDEX_PASSWORD=$(cat /run/secrets/token) && \
     export UV_EXTRA_INDEX_URL="https://pypi.org/simple" && \
-    uv build --wheel && \
+    CARGO_REGISTRIES_CODEARTIFACT_TOKEN="$(cat /run/secrets/token)" uv build --wheel && \
     uv publish \
       --publish-url "${CODEARTIFACT_URL}" \
       --username aws \
