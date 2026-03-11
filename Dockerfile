@@ -14,7 +14,11 @@ ENV CARGO_REGISTRIES_CODEARTIFACT_TOKEN="Bearer ${CODEARTIFACT_TOKEN}"
 WORKDIR /app
 COPY . .
 
-RUN printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml
+RUN printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml && \
+    echo "DEBUG: CARGO token length=${#CARGO_REGISTRIES_CODEARTIFACT_TOKEN}" && \
+    curl -s -o /dev/null -w "DEBUG: cargo endpoint HTTP status=%{http_code}\n" \
+      -H "Authorization: ${CARGO_REGISTRIES_CODEARTIFACT_TOKEN}" \
+      "${CODEARTIFACT_CARGO_URL}config.json"
 
 RUN --mount=type=secret,id=token \
     pip install uv && \
