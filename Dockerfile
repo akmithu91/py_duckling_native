@@ -11,14 +11,8 @@ ARG CODEARTIFACT_CARGO_URL
 
 WORKDIR /app
 COPY . .
-
 RUN --mount=type=secret,id=token \
-    mkdir -p .cargo && \
-    printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > .cargo/config.toml && \
-    echo "--- DEBUG: testing token against CodeArtifact Cargo endpoint ---" && \
-    echo "Token length: $(cat /run/secrets/token | wc -c)" && \
-    curl -s -o /dev/null -w "HTTP status: %{http_code}\n" -H "Authorization: Bearer $(cat /run/secrets/token)" "${CODEARTIFACT_CARGO_URL}config.json" && \
-    echo "--- DEBUG: end ---" && \
+    printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml && \
     cargo login --registry codeartifact "Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
