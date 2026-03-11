@@ -12,8 +12,8 @@ phases:
   build:
     commands:
       - echo "Testing token from CodeBuild host..."
-      - curl -s -o /dev/null -w "HOST PyPI  Basic:  %{http_code}\n" -u "aws:$CODEARTIFACT_TOKEN" "${CODEARTIFACT_URL}simple/"
-      - curl -s -o /dev/null -w "HOST Cargo Bearer: %{http_code}\n" -H "Authorization: Bearer $CODEARTIFACT_TOKEN" "${CODEARTIFACT_CARGO_URL}config.json"
+      - curl -s -o /dev/null -w "HOST PyPI Basic %{http_code}\n" -u "aws:$CODEARTIFACT_TOKEN" "${CODEARTIFACT_URL}simple/"
+      - curl -s -o /dev/null -w "HOST Cargo Bearer %{http_code}\n" -H "Authorization:Bearer $CODEARTIFACT_TOKEN" "${CODEARTIFACT_CARGO_URL}config.json"
       - echo "Building Docker image..."
       - docker buildx build
           --cache-from type=s3,region=${AWS_REGION},bucket=${CACHE_BUCKET},prefix=${CACHE_PREFIX}/
