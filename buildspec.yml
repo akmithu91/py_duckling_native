@@ -4,16 +4,13 @@ phases:
   pre_build:
     commands:
       - echo "Authenticating with CodeArtifact..."
-      - export CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --query authorizationToken --output text)
-      - export CODEARTIFACT_URL=$(aws codeartifact get-repository-endpoint --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --repository pip-repo --format pypi --query repositoryEndpoint --output text)
-      - export CODEARTIFACT_CARGO_URL=$(aws codeartifact get-repository-endpoint --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --repository cargo-repo --format cargo --query repositoryEndpoint --output text)
+      - CODEARTIFACT_TOKEN=$(aws codeartifact get-authorization-token --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --query authorizationToken --output text)
+      - CODEARTIFACT_URL=$(aws codeartifact get-repository-endpoint --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --repository pip-repo --format pypi --query repositoryEndpoint --output text)
+      - CODEARTIFACT_CARGO_URL=$(aws codeartifact get-repository-endpoint --domain $CODEARTIFACT_DOMAIN --domain-owner $CODEARTIFACT_DOMAIN_OWNER --repository cargo-repo --format cargo --query repositoryEndpoint --output text)
       - echo "$DOCKERHUB_TOKEN" | docker login -u "$DOCKERHUB_USERNAME" --password-stdin
       - docker buildx create --use --driver docker-container
   build:
     commands:
-      - echo "Testing token from CodeBuild host..."
-      - curl -s -o /dev/null -w "HOST PyPI Basic %{http_code}\n" -u "aws:$CODEARTIFACT_TOKEN" "${CODEARTIFACT_URL}simple/"
-      - curl -s -o /dev/null -w "HOST Cargo Bearer %{http_code}\n" -H "Authorization:Bearer $CODEARTIFACT_TOKEN" "${CODEARTIFACT_CARGO_URL}config.json"
       - echo "Building Docker image..."
       - docker buildx build
           --cache-from type=s3,region=${AWS_REGION},bucket=${CACHE_BUCKET},prefix=${CACHE_PREFIX}/
