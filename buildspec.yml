@@ -17,6 +17,7 @@ phases:
           --cache-to type=s3,region=${AWS_REGION},bucket=${CACHE_BUCKET},prefix=${CACHE_PREFIX}/,mode=max
           --build-arg CODEARTIFACT_URL="${CODEARTIFACT_URL}"
           --build-arg CODEARTIFACT_CARGO_URL="${CODEARTIFACT_CARGO_URL}"
+          --build-arg CODEARTIFACT_TOKEN="${CODEARTIFACT_TOKEN}"
           --secret id=token,env=CODEARTIFACT_TOKEN
           -t py-duckling-native
           --load

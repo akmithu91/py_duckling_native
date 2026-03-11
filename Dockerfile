@@ -8,12 +8,15 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 
 ARG CODEARTIFACT_URL
 ARG CODEARTIFACT_CARGO_URL
+ARG CODEARTIFACT_TOKEN
+ENV CARGO_REGISTRIES_CODEARTIFACT_TOKEN="Bearer ${CODEARTIFACT_TOKEN}"
 
 WORKDIR /app
 COPY . .
+
+RUN printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml
+
 RUN --mount=type=secret,id=token \
-    printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider = "cargo:token"\n' "${CODEARTIFACT_CARGO_URL}" > /root/.cargo/config.toml && \
-    cargo login --registry codeartifact "Bearer $(cat /run/secrets/token)" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
     export UV_INDEX_USERNAME=aws && \
