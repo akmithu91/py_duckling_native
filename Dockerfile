@@ -21,6 +21,12 @@ RUN printf '[registries.codeartifact]\nindex = "sparse+%s"\ncredential-provider 
       "${CODEARTIFACT_CARGO_URL}config.json"
 
 RUN --mount=type=secret,id=token \
+    TOKEN=$(cat /run/secrets/token) && \
+    echo "--- DEBUG auth tests ---" && \
+    curl -s -o /dev/null -w "PyPI  Basic  auth: %{http_code}\n" -u "aws:$TOKEN" "${CODEARTIFACT_URL}simple/" && \
+    curl -s -o /dev/null -w "Cargo Bearer auth: %{http_code}\n" -H "Authorization: Bearer $TOKEN" "${CODEARTIFACT_CARGO_URL}config.json" && \
+    curl -s -o /dev/null -w "Cargo Basic  auth: %{http_code}\n" -u "aws:$TOKEN" "${CODEARTIFACT_CARGO_URL}config.json" && \
+    echo "--- END DEBUG ---" && \
     pip install uv && \
     export UV_INDEX_URL="${CODEARTIFACT_URL}simple/" && \
     export UV_INDEX_USERNAME=aws && \
